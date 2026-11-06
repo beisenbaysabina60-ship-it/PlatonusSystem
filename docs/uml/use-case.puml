@@ -1,0 +1,35 @@
+
+@startuml
+left to right direction
+
+actor Student
+actor Teacher
+actor Administrator
+
+rectangle "Platonus System" {
+  usecase "Scan QR Code" as UC1
+  usecase "View Attendance" as UC2
+  usecase "Open Lesson" as UC3
+  usecase "Register Attendance" as UC4
+  usecase "Activate Offline Mode" as UC5
+  usecase "Save Data Locally" as UC6
+  usecase "Synchronize Data" as UC7
+  usecase "Confirm Attendance" as UC8
+}
+
+Student --> UC1
+Student --> UC2
+
+Teacher --> UC3
+Teacher --> UC4
+Teacher --> UC5
+Teacher --> UC8
+
+UC4 .> UC5 : <<extend>>
+UC5 --> UC6
+UC6 --> UC7
+UC7 --> UC8
+
+Administrator --> UC2
+
+@enduml
