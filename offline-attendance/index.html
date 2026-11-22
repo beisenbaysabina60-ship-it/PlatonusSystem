@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platonus Offline Attendance</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        header {
+            background: #173b72;
+            color: white;
+            padding: 20px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .status {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .offline {
+            color: #d9534f;
+            font-weight: bold;
+        }
+
+        .online {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000010;
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #173b72;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #24569b;
+        }
+
+        .sync-btn {
+            background: #28a745;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #173b72;
+            color: white;
+        }
+
+        .pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .synced {
+            color: green;
+            font-weight: bold;
+        }
+
+        @media(max-width: 700px) {
+            .status {
+                display: block;
+            }
+
+            table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Platonus — Offline Attendance</h1>
+    <p>QR-код жұмыс істемеген жағдайда қатысуды резервтік тіркеу жүйесі</p>
+</header>
+
+<div class="container">
+
+    <div class="status">
+        <div>
+            <h3>Интернет жағдайы:</h3>
+            <span id="connectionStatus"></span>
+        </div>
+
+        <div>
+            <h3>Сақталған жазбалар:</h3>
+            <span id="recordCount">0</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Қатысуды белгілеу</h2>
+
+        <input type="text" id="studentId"
+               placeholder="Студент ID">
+
+        <input type="text" id="studentName"
+               placeholder="Студент аты-жөні">
+
+        <input type="text" id="course"
+               placeholder="Пән атауы">
+
+        <select id="attendanceStatus">
+            <option value="PRESENT">Қатысты (PRESENT)</option>
+            <option value="ABSENT">Қатыспады (ABSENT)</option>
+        </select>
+
+        <button onclick="addAttendance()">
+            Қатысуды сақтау
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Қатысу журналы</h2>
+
+        <button class="sync-btn" onclick="syncData()">
+            Деректерді синхрондау
+        </button>
+
+        <button onclick="clearData()">
+            Журналды тазалау
+        </button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Студент</th>
+                    <th>Пән</th>
+                    <th>Статус</th>
+                    <th>Синхрондау</th>
+                </tr>
+            </thead>
+
+            <tbody id="attendanceTable">
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let attendanceRecords = JSON.parse(
+        localStorage.getItem("attendanceRecords")
+    ) || [];
+
+    function updateConnectionStatus() {
+        const status = document.getElementById("connectionStatus");
+
+        if (navigator.onLine) {
+            status.textContent = "ONLINE";
+            status.className = "online";
+        } else {
+            status.textContent = "OFFLINE";
+            status.className = "offline";
+        }
+    }
+
+    function addAttendance() {
+        const studentId = document.getElementById("studentId").value;
+        const studentName = document.getElementById("studentName").value;
+        const course = document.getElementById("course").value;
+        const status = document.getElementById("attendanceStatus").value;
+
+        if (!studentId || !studentName || !course) {
+            alert("Барлық өрістерді толтырыңыз!");
+            return;
+        }
+
+        const record = {
+            id: Date.now(),
+            studentId: studentId,
+            studentName: studentName,
+            course: course,
+            status: status,
+            syncStatus: "PENDING",
+            date: new Date().toLocaleString()
+        };
+
+        attendanceRecords.push(record);
+
+        saveData();
+        renderTable();
+
+        document.getElementById("studentId").value = "";
+        document.getElementById("studentName").value = "";
+        document.getElementById("course").value = "";
+
+        alert("Қатысу деректері сақталды!");
+    }
+
+    function saveData() {
+        localStorage.setItem(
+            "attendanceRecords",
+            JSON.stringify(attendanceRecords)
+        );
+    }
+
+    function renderTable() {
+        const table = document.getElementById("attendanceTable");
+
+        table.innerHTML = "";
+
+        attendanceRecords.forEach(record => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${record.studentId}</td>
+                <td>${record.studentName}</td>
+                <td>${record.course}</td>
+                <td>${record.status}</td>
+                <td class="${record.syncStatus === 'SYNCED' ? 'synced' : 'pending'}">
+                    ${record.syncStatus}
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+
+        document.getElementById("recordCount").textContent =
+            attendanceRecords.length;
+    }
+
+    function syncData() {
+        if (!navigator.onLine) {
+            alert("Интернет жоқ! Деректер жергілікті сақталған.");
+            return;
+        }
+
+        attendanceRecords.forEach(record => {
+            record.syncStatus = "SYNCED";
+        });
+
+        saveData();
+        renderTable();
+
+        alert("Деректер синхрондалды!");
+    }
+
+    function clearData() {
+        if (confirm("Барлық жазбаларды өшіресіз бе?")) {
+            attendanceRecords = [];
+            saveData();
+            renderTable();
+        }
+    }
+
+    window.addEventListener("online", updateConnectionStatus);
+    window.addEventListener("offline", updateConnectionStatus);
+
+    updateConnectionStatus();
+    renderTable();
+</script>
+
+</body>
+</html>
