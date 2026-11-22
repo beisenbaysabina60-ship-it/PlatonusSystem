@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: kz.platonus.repository.StudentRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in kz.platonus.repository.StudentRepositoryTest
