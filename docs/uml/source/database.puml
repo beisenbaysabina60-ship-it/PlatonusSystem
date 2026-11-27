@@ -1,0 +1,21 @@
+@startuml
+entity users { *id : INTEGER <<PK>>; full_name : TEXT; email : TEXT <<UNIQUE>>; role : TEXT }
+entity students { *id : INTEGER <<PK>>; user_id : INTEGER <<FK>>; student_number : TEXT; group_name : TEXT }
+entity teachers { *id : INTEGER <<PK>>; user_id : INTEGER <<FK>>; department : TEXT }
+entity admins { *id : INTEGER <<PK>>; user_id : INTEGER <<FK>>; admin_level : TEXT }
+entity courses { *id : INTEGER <<PK>>; course_name : TEXT; course_code : TEXT; credits : INTEGER }
+entity student_groups { *id : INTEGER <<PK>>; group_name : TEXT; specialty : TEXT }
+entity lessons { *id : INTEGER <<PK>>; course_id : INTEGER <<FK>>; teacher_id : INTEGER <<FK>>; group_id : INTEGER <<FK>>; lesson_date : TEXT; start_time : TEXT; end_time : TEXT; room : TEXT }
+entity attendance { *id : INTEGER <<PK>>; student_id : INTEGER <<FK>>; lesson_id : INTEGER <<FK>>; status : TEXT }
+entity grades { *id : INTEGER <<PK>>; student_id : INTEGER <<FK>>; course_id : INTEGER <<FK>>; score : REAL; letter_grade : TEXT }
+users ||--o| students
+users ||--o| teachers
+users ||--o| admins
+courses ||--o{ lessons
+teachers ||--o{ lessons
+student_groups ||--o{ lessons
+students ||--o{ attendance
+lessons ||--o{ attendance
+students ||--o{ grades
+courses ||--o{ grades
+@enduml

@@ -57,6 +57,16 @@
                 <version>3.3.0</version>
             </plugin>
 
+            <!-- Run the console application with mvn exec:java -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>kz.platonus.App</mainClass>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 

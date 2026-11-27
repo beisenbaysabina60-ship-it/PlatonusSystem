@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+actor Student
+actor Teacher
+actor Administrator
+rectangle "Platonus University Management System" {
+  usecase "View grades and attendance" as UC1
+  usecase "Manage attendance" as UC2
+  usecase "Manage grades" as UC3
+  usecase "Manage lessons" as UC4
+  usecase "Manage courses" as UC5
+  usecase "Manage student groups" as UC6
+  usecase "Manage student records" as UC7
+  usecase "Manage teacher records" as UC8
+  usecase "Export reports CSV/JSON" as UC9
+}
+Student --> UC1
+Teacher --> UC2
+Teacher --> UC3
+Teacher --> UC4
+Administrator --> UC5
+Administrator --> UC6
+Administrator --> UC7
+Administrator --> UC8
+Teacher --> UC9
+@enduml

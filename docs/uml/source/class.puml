@@ -1,0 +1,32 @@
+@startuml
+abstract class User {
+  - id: int
+  - fullName: String
+  - email: String
+  + getRole(): UserRole
+}
+class Student
+class Teacher
+class Admin
+User <|-- Student
+User <|-- Teacher
+User <|-- Admin
+enum UserRole
+User --> UserRole
+class Course
+class StudentGroup
+class Lesson
+class Attendance
+class Grade
+interface GenericRepository<T, ID>
+class StudentRepository
+StudentRepository ..|> GenericRepository
+StudentRepository --> Student
+Lesson --> Course
+Lesson --> Teacher
+Lesson --> StudentGroup
+Attendance --> Student
+Attendance --> Lesson
+Grade --> Student
+Grade --> Course
+@enduml

@@ -9,6 +9,9 @@ import kz.platonus.model.Lesson;
 import kz.platonus.model.Course;
 import kz.platonus.model.Teacher;
 import kz.platonus.model.StudentGroup;
+import kz.platonus.schedule.ScheduleConflictService;
+import kz.platonus.schedule.ScheduleGenerator;
+import kz.platonus.schedule.ScheduleRequest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,6 +25,7 @@ public class LessonMenu {
     private final TeacherDAO teacherDAO;
     private final StudentGroupDAO groupDAO;
     private final Scanner scanner;
+    private final ScheduleConflictService scheduleConflictService = new ScheduleConflictService();
 
     public LessonMenu(Scanner scanner) {
         this.lessonDAO = new LessonDAO();
@@ -43,6 +47,7 @@ public class LessonMenu {
             System.out.println("3. Find lesson by ID");
             System.out.println("4. Update lesson");
             System.out.println("5. Delete lesson");
+            System.out.println("6. Generate timetable automatically");
             System.out.println("0. Back");
             System.out.print("Choose: ");
 
@@ -67,6 +72,10 @@ public class LessonMenu {
 
                 case "5":
                     deleteLesson();
+                    break;
+
+                case "6":
+                    generateTimetable();
                     break;
 
                 case "0":
@@ -144,10 +153,70 @@ public class LessonMenu {
                     room
             );
 
+            List<String> conflicts = scheduleConflictService.findConflicts(
+                    lesson, lessonDAO.findAll());
+            if (!conflicts.isEmpty()) {
+                System.out.println("Cannot add lesson because of timetable conflicts:");
+                conflicts.forEach(System.out::println);
+                return;
+            }
+
             lessonDAO.addLesson(lesson);
 
         } catch (Exception e) {
             System.out.println("Error adding lesson: " + e.getMessage());
+        }
+    }
+
+
+    // Автоматты сабақ кестесін құру (greedy алгоритмі).
+    private void generateTimetable() {
+        try {
+            System.out.print("Number of lessons to schedule: ");
+            int count = Integer.parseInt(scanner.nextLine());
+            if (count <= 0 || count > 100) {
+                System.out.println("Enter a number between 1 and 100.");
+                return;
+            }
+
+            List<ScheduleRequest> requests = new java.util.ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                System.out.println("Lesson request " + (i + 1));
+                System.out.print("Course ID: ");
+                Course course = courseDAO.findById(Integer.parseInt(scanner.nextLine()));
+                System.out.print("Teacher ID: ");
+                Teacher teacher = teacherDAO.findById(Integer.parseInt(scanner.nextLine()));
+                System.out.print("Group ID: ");
+                StudentGroup group = groupDAO.findById(Integer.parseInt(scanner.nextLine()));
+                System.out.print("Duration in minutes: ");
+                int duration = Integer.parseInt(scanner.nextLine());
+                if (course == null || teacher == null || group == null) {
+                    System.out.println("Course, teacher or group not found. Generation cancelled.");
+                    return;
+                }
+                requests.add(new ScheduleRequest(course, teacher, group, duration));
+            }
+
+            System.out.print("First date (YYYY-MM-DD): ");
+            LocalDate firstDate = LocalDate.parse(scanner.nextLine());
+            System.out.print("Number of calendar days to search: ");
+            int days = Integer.parseInt(scanner.nextLine());
+            System.out.print("Available rooms (comma-separated): ");
+            List<String> rooms = java.util.Arrays.stream(scanner.nextLine().split(","))
+                    .map(String::trim).filter(room -> !room.isEmpty()).toList();
+
+            List<Lesson> existing = lessonDAO.findAll();
+            int firstId = existing.stream().mapToInt(Lesson::getId).max().orElse(0) + 1;
+            List<Lesson> generated = new ScheduleGenerator().generate(
+                    requests, existing, firstDate, days, rooms, firstId);
+
+            for (Lesson lesson : generated) {
+                lessonDAO.addLesson(lesson);
+                printLesson(lesson);
+            }
+            System.out.println("Generated and saved " + generated.size() + " lessons.");
+        } catch (Exception e) {
+            System.out.println("Timetable generation failed: " + e.getMessage());
         }
     }
 
@@ -257,6 +326,15 @@ public class LessonMenu {
                     endTime,
                     room
             );
+
+            List<Lesson> existingLessons = lessonDAO.findAll();
+            List<String> conflicts = scheduleConflictService.findConflicts(
+                    updatedLesson, existingLessons);
+            if (!conflicts.isEmpty()) {
+                System.out.println("Cannot update lesson because of timetable conflicts:");
+                conflicts.forEach(System.out::println);
+                return;
+            }
 
             lessonDAO.updateLesson(updatedLesson);
 

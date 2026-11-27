@@ -1,0 +1,12 @@
+@startuml
+actor Teacher
+participant "AttendanceMenu" as Menu
+participant "AttendanceDAO" as DAO
+database SQLite
+Teacher -> Menu: Select lesson and attendance status
+Menu -> DAO: addAttendance(attendance)
+DAO -> SQLite: INSERT attendance
+SQLite --> DAO: row inserted
+DAO --> Menu: success
+Menu --> Teacher: confirmation
+@enduml

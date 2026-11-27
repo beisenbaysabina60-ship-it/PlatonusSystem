@@ -1,79 +1,63 @@
-# PlatonusSystem
+# Platonus University Management System
 
-## Project Description
-PlatonusSystem is a university academic management system developed in Java. The system manages students, teachers, courses, student groups, lessons, attendance, and grades.
+Java 17 және SQLite негізінде жасалған университеттің оқу процесін басқаруға арналған оқу жобасы.
 
-## Features
-- Student management (CRUD)
-- Teacher management (CRUD)
-- Course management (CRUD)
-- Student group management
-- Lesson management
-- Attendance management
-- Grade management
-- Grade statistics and GPA calculation
-- CSV export
-- JSON export
-- Multithreading
-- SQLite database
-- Automated tests using JUnit 5
+> Бұл жоба — оқу мақсатындағы консольдік прототип. Ол нақты Platonus production серверіне немесе университеттің ішкі деректеріне қосылмайды.
 
-## Technologies
-- Java 17
-- Maven
-- SQLite
-- JDBC
-- JUnit 5
-- Git & GitHub
+## Мүмкіндіктері
+- Студенттерді, оқытушыларды, пәндерді және оқу топтарын CRUD арқылы басқару
+- Сабақтар мен сабаққа қатысуды басқару
+- Бағаларды енгізу және өзгерту
+- Бағалар бойынша статистика және орташа балл есептеу
+- CSV және JSON экспорт
+- Бағаларды параллель өңдеу (multithreading)
+- SQLite дерекқоры, JDBC және DAO қабаты
+- Generic Repository үлгісі
+- Сабақ кестесіндегі оқытушы, топ және аудитория уақыттарының қабаттасуын тексеретін `ScheduleConflictService`
+- Бос жұмыс күнін, уақыт аралығын және аудиторияны таңдап, сабақтарды greedy алгоритмімен орналастыратын `ScheduleGenerator`
+- JUnit 5 тесттері
 
-## Project Structure
+## Технологиялар
+Java 17, Maven, SQLite, JDBC, JUnit 5, Git/GitHub, CSV, JSON.
+
+## Жоба құрылымы
 ```text
-src/
-├── main/
-│   └── java/
-│       └── kz/platonus/
-│           ├── model/
-│           ├── dao/
-│           ├── service/
-│           ├── database/
-│           ├── export/
-│           └── concurrency/
-└── test/
-    └── java/
+PlatonusSystem/
+├── .github/                 # CI workflow және PR шаблоны
+├── data/exports/            # Экспорт файлдары (жергілікті)
+├── docs/
+│   ├── research.md          # Research
+│   └── uml/                 # UML және дерекқор құжаттары
+├── src/main/java/           # Қолданба коды
+├── src/test/java/           # JUnit 5 тесттері
+├── .gitignore
+├── pom.xml
+└── README.md
 ```
 
-## Database
-The application uses SQLite for data storage.
+## Іске қосу
+Талаптар: JDK 17+ және Maven.
 
-## Testing
-The project contains **140 automated tests**.
-
-Test results:
-- Tests run: 140
-- Failures: 0
-- Errors: 0
-- Skipped: 0
-
-All tests passed successfully.
-
-## How to Run
-
-### Requirements
-- JDK 17+
-- Maven
-
-### Run tests
+Тесттер:
 ```bash
-mvn clean test
+mvn clean verify
 ```
 
-### Run the application
+Қосымшаны іске қосу:
 ```bash
 mvn exec:java
 ```
 
-## Team Project
-Developed as a university Java project using GitHub for version control and collaboration.
+## Құжаттама
+- [Research](docs/research.md)
+- [Database schema](docs/uml/database-schema.md)
+- [UML диаграммалары](docs/uml/)
 
-## Repository
-GitHub: https://github.com/beisenbaysabina60-ship-it/PlatonusSystem
+## Деректер қоры
+SQLite дерекқоры `platonus.db` файлы ретінде жоба түбірінде жасалады. Бұл файл `.gitignore` арқылы Git-ке қосылмайды; қосымша іске қосылғанда кестелерді `DatabaseInitializer` жасайды.
+
+## Тестілеу
+Тесттерді қайта орындап, ағымдағы нақты нәтижені `mvn clean verify` қорытындысынан алыңыз. README ішінде алдын ала бекітілген тест саны көрсетілмейді, себебі тесттер саны өзгеруі мүмкін.
+
+## GitHub командалық жұмыс
+Feature branch жасаңыз, өзгерістерді commit етіңіз, GitHub-та Pull Request ашыңыз. PR-ға кемінде бір командалас код шолуын қалдырып, CI тесттері өткеннен кейін ғана merge жасаңыз. CI конфигурациясы `.github/workflows/maven.yml` ішінде.

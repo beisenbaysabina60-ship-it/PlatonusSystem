@@ -4,6 +4,9 @@ import kz.platonus.dao.GradeDAO;
 import kz.platonus.model.Grade;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public class GradeStatisticsService {
@@ -50,6 +53,26 @@ public class GradeStatisticsService {
                 .sorted((g1, g2) ->
                         Double.compare(g2.getScore(), g1.getScore()))
                 .collect(Collectors.toList());
+    }
+
+    // Stream API: map — бағаларды әріптік бағаға түрлендіру.
+    public List<String> getLetterGrades(int studentId) {
+        return gradeDAO.findByStudentId(studentId).stream()
+                .map(Grade::getLetterGrade)
+                .collect(Collectors.toList());
+    }
+
+    // Set коллекциясы: қайталанбайтын әріптік бағаларды алу.
+    public Set<String> getDistinctLetterGrades(int studentId) {
+        return gradeDAO.findByStudentId(studentId).stream()
+                .map(Grade::getLetterGrade)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    // Stream API: groupingBy — бағаларды әріптік баға бойынша топтау.
+    public Map<String, List<Grade>> groupGradesByLetter(int studentId) {
+        return gradeDAO.findByStudentId(studentId).stream()
+                .collect(Collectors.groupingBy(Grade::getLetterGrade));
     }
 
     // Орташа балл
